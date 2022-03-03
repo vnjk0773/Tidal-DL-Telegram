@@ -37,6 +37,7 @@ Feel free to ask doubts in Discussion Group.
 
     ALREADY_AUTH = "Your authentication is already done.\nIts is valid for {}"
     AUTH_DISABLED = "Cannot download because authentication is disabled."
+    WAIT_UPLOAD_MODE = "Choose how you want to upload the songs."
 #
 #
 # INLINE MODE TEXTS..............................................................

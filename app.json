@@ -72,12 +72,12 @@
     },
     "TIDAL_REGION": {
       "description": "Tidal region for search api (recomment to use default)",
-      "value": "",
+      "value": "IN",
       "required": true
     },
     "TIDAL_SEARCH_LIMIT": {
       "description": "Limit number of search results",
-      "value": "",
+      "value": "10",
       "required": true
     },
     "BOT_USERNAME": {

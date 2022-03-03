@@ -13,6 +13,7 @@ import logging
 import os
 import time
 import requests
+import shutil
 
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
@@ -347,7 +348,7 @@ def convert(srcPath, stream):
     return srcPath
 
 
-async def downloadTrack(track: Track, album=None, playlist=None, userProgress=None, partSize=1048576, bot=None, chat_id=None, reply_to_id=None):
+async def downloadTrack(track: Track, album=None, playlist=None, userProgress=None, partSize=1048576, bot=None, chat_id=None, reply_to_id=None, zipit=None):
     try:
         msg, stream = API.getStreamUrl(track.id, CONF.audioQuality)
         if not aigpy.string.isNull(msg) or stream is None:
@@ -407,14 +408,18 @@ async def downloadTrack(track: Track, album=None, playlist=None, userProgress=No
             if metadata.has("artist"):
                 artist = metadata.get("artist")
             thumb_path = Config.DOWNLOAD_BASE_DIR + f"/thumb/{reply_to_id}.jpg"
-            media_file = await bot.send_audio(
-                chat_id=chat_id,
-                audio=path,
-                duration=duration,
-                performer=artist,
-                title=title,
-                thumb=thumb_path,
-                reply_to_message_id=reply_to_id
+            if zipit == "allowed":
+                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + reply_to_id
+                shutil.move(path, zip_dir)
+            else:
+                media_file = await bot.send_audio(
+                    chat_id=chat_id,
+                    audio=path,
+                    duration=duration,
+                    performer=artist,
+                    title=title,
+                    thumb=thumb_path,
+                    reply_to_message_id=reply_to_id
             )
             if Config.ALLOW_DUMP:
                 await media_file.copy(

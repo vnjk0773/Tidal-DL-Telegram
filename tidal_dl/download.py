@@ -12,6 +12,7 @@
 from time import sleep
 import logging
 import os
+import shutil
 
 from bot import Config
 from bot.helpers.translations import lang
@@ -22,6 +23,8 @@ from tidal_dl.enums import Type
 from tidal_dl.model import Mix
 from tidal_dl.printf import Printf
 from tidal_dl.util import downloadTrack, downloadVideo, getAlbumPath, API
+
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def __loadAPI__(user):
     API.key.accessToken = user.accessToken
@@ -92,7 +95,7 @@ async def __saveAlbumInfo__(conf, album, tracks):
     aigpy.file.write(path, infos, "w+")
 
 
-async def __album__(conf, obj, bot, chat_id, reply_to_id):
+async def __album__(conf, obj, bot, chat_id, reply_to_id, zipit):
     msg, tracks, videos = API.getItems(obj.id, Type.Album)
     if not aigpy.string.isNull(msg):
         return
@@ -102,7 +105,7 @@ async def __album__(conf, obj, bot, chat_id, reply_to_id):
     for item in tracks:
         if conf.saveCovers:
             await __downloadCover__(conf, obj, reply_to_id)
-        await downloadTrack(item, obj, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id)
+        await downloadTrack(item, obj, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id, zipit=zipit)
         sleep(1)
     """for item in videos:
         downloadVideo(item, obj)"""
@@ -112,23 +115,23 @@ async def __track__(conf, obj, bot, chat_id, reply_to_id):
     msg, album = API.getAlbum(obj.album.id)
     if conf.saveCovers:
         await __downloadCover__(conf, album, reply_to_id)
-    await downloadTrack(obj, album, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id)
+    await downloadTrack(obj, album, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id, zipit=False)
 
 
 async def __video__(conf, obj, bot, chat_id, reply_to_id):
     downloadVideo(obj, obj.album)
 
 
-async def __artist__(conf, obj, bot, chat_id, reply_to_id):
+async def __artist__(conf, obj, bot, chat_id, reply_to_id, zipit):
     msg, albums = API.getArtistAlbums(obj.id, conf.includeEP)
     #Printf.artist(obj, len(albums))
     if not aigpy.string.isNull(msg):
         return
     for item in albums:
-        await __album__(conf, item)
+        await __album__(conf, item, bot, chat_id, reply_to_id, zipit)
 
 
-async def __playlist__(conf, obj, bot, chat_id, reply_to_id):
+async def __playlist__(conf, obj, bot, chat_id, reply_to_id, zipit):
     msg, tracks, videos = API.getItems(obj.uuid, Type.Playlist)
     if not aigpy.string.isNull(msg):
         return
@@ -136,17 +139,17 @@ async def __playlist__(conf, obj, bot, chat_id, reply_to_id):
     for index, item in enumerate(tracks):
         mag, album = API.getAlbum(item.album.id)
         item.trackNumberOnPlaylist = index + 1
-        await downloadTrack(item, album, obj, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id)
+        await downloadTrack(item, album, obj, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id, zipit=zipit)
         if conf.saveCovers and not conf.usePlaylistFolder:
             await __downloadCover__(conf, album, reply_to_id)
 
         
 
-async def __mix__(conf, obj: Mix, bot, chat_id, reply_to_id):
+async def __mix__(conf, obj: Mix, bot, chat_id, reply_to_id, zipit):
     for index, item in enumerate(obj.tracks):
         mag, album = API.getAlbum(item.album.id)
         item.trackNumberOnPlaylist = index + 1
-        await downloadTrack(item, album, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id)
+        await downloadTrack(item, album, bot=bot, chat_id=chat_id, reply_to_id=reply_to_id, zipit=zipit)
         if conf.saveCovers and not conf.usePlaylistFolder:
             await __downloadCover__(conf, album, reply_to_id)
 
@@ -165,7 +168,7 @@ async def file(user, conf, string):
         await start(user, conf, item)
 
 
-async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None):
+async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zipit=None):
     __loadAPI__(user)
     if aigpy.string.isNull(string):
         return
@@ -190,15 +193,51 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None):
             Printf.err(msg + " [" + item + "]")
             return
 
-        if etype == Type.Album:
-            await __album__(conf, obj, bot, chat_id, reply_to_id)
+        
         if etype == Type.Track:
             await __track__(conf, obj, bot, chat_id, reply_to_id)
-        if etype == Type.Video:
-            await __video__(conf, obj, bot, chat_id, reply_to_id)
-        if etype == Type.Artist:
-            await __artist__(conf, obj, bot, chat_id, reply_to_id)
-        if etype == Type.Playlist:
-            await __playlist__(conf, obj, bot, chat_id, reply_to_id)
-        if etype == Type.Mix:
-            await __mix__(conf, obj, bot, chat_id, reply_to_id)
+        elif zipit == None:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=lang.WAIT_UPLOAD_MODE,
+                reply_to_message_id=reply_to_id,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton(
+                                text="All songs in ZIP",
+                                callback_data="z_" + string
+                            )
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                text="All songs to TG Seperately",
+                                callback_data="t_" + string
+                            )
+                        ]
+                    ]
+                )
+            ) 
+        else:
+            if zipit == "allowed":
+                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + reply_to_id
+                os.makedirs(zip_dir, exist_ok=True)
+            if etype == Type.Album:
+                await __album__(conf, obj, bot, chat_id, reply_to_id, zipit)
+            if etype == Type.Artist:
+                await __artist__(conf, obj, bot, chat_id, reply_to_id, zipit)
+            if etype == Type.Playlist:
+                await __playlist__(conf, obj, bot, chat_id, reply_to_id, zipit)
+            if etype == Type.Mix:
+                await __mix__(conf, obj, bot, chat_id, reply_to_id, zipit)
+            if zipit == "allowed":
+                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + reply_to_id
+                zip_file = zip_dir + "/" + obj.name
+                if os.path.exists(zip_file):
+                    os.remove(zip_file)
+                shutil.make_archive(zip_dir, 'zip', zip_file)
+                await bot.send_document(
+                    chat_id=chat_id,
+                    document=zip_file + ".zip",
+                    reply_to_message_id=reply_to_id
+                )

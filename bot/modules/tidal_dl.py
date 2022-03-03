@@ -2,6 +2,7 @@ import tidal_dl
 from bot import CMD
 from pyrogram import Client, filters
 from tidal_dl.util import CONF, TOKEN
+from pyrogram.types import CallbackQuery
 from bot.helpers.translations import lang
 from bot.helpers.utils.auth_check import check_id
 from tidal_dl.download import start as tidal_dl_start
@@ -43,4 +44,14 @@ def auth_tidal(bot, update):
         chat_id = update.chat.id
         reply_to_id = update.message_id
         tidal_dl.checkLogin(bot, chat_id, reply_to_id, True)
+
+@Client.on_callback_query(filters.regex("z_"))
+async def zip_tidal(c: Client, cb: CallbackQuery):
+        string = cb.data.split("_")[1]
+        await tidal_dl_start(TOKEN, CONF, string, c, cb.message.chat.id, cb.message.reply_to_message.message_id, "allowed")
+
+@Client.on_callback_query(filters.regex("t_"))
+async def zip_tidal(c: Client, cb: CallbackQuery):
+        string = cb.data.split("_")[1]
+        await tidal_dl_start(TOKEN, CONF, string, c, cb.message.chat.id, cb.message.reply_to_message.message_id, "not_allowed")
 
