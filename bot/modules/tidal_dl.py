@@ -1,5 +1,5 @@
 import tidal_dl
-from bot import CMD
+from bot import CMD, LOGGER
 from pyrogram import Client, filters
 from tidal_dl.util import CONF, TOKEN
 from pyrogram.types import CallbackQuery
@@ -47,6 +47,7 @@ def auth_tidal(bot, update):
 
 @Client.on_callback_query(filters.regex("z_"))
 async def zip_tidal(c: Client, cb: CallbackQuery):
+        LOGGER.info("ZIPPING")
         string = cb.data.split("_")[1]
         await tidal_dl_start(TOKEN, CONF, string, c, cb.message.chat.id, cb.message.reply_to_message.message_id, "allowed")
 

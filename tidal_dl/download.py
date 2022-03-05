@@ -14,7 +14,7 @@ import logging
 import os
 import shutil
 
-from bot import Config
+from bot import LOGGER, Config
 from bot.helpers.translations import lang
 
 import aigpy
@@ -231,6 +231,7 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
             if etype == Type.Mix:
                 await __mix__(conf, obj, bot, chat_id, reply_to_id, zipit)
             if zipit == "allowed":
+                LOGGER.info("ZIP: " + zip_dir)
                 zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + reply_to_id
                 zip_file = zip_dir + "/" + obj.name
                 if os.path.exists(zip_file):
