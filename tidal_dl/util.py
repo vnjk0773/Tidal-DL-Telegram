@@ -32,7 +32,7 @@ from tidal_dl.printf import Printf
 from tidal_dl.settings import Settings, TokenSettings, getLogPath
 from tidal_dl.tidal import TidalAPI
 
-from bot import Config
+from bot import LOGGER, Config
 from bot.helpers.translations import lang
 
 
@@ -409,8 +409,10 @@ async def downloadTrack(track: Track, album=None, playlist=None, userProgress=No
                 artist = metadata.get("artist")
             thumb_path = Config.DOWNLOAD_BASE_DIR + f"/thumb/{reply_to_id}.jpg"
             if zipit == "allowed":
+                filename = os.path.basename(path)
+                LOGGER.info(filename)
                 zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
-                shutil.move(path, zip_dir)
+                os.rename(path, zip_dir + "/" + filename)
             else:
                 media_file = await bot.send_audio(
                     chat_id=chat_id,
