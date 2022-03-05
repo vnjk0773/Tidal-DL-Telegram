@@ -410,7 +410,6 @@ async def downloadTrack(track: Track, album=None, playlist=None, userProgress=No
             thumb_path = Config.DOWNLOAD_BASE_DIR + f"/thumb/{reply_to_id}.jpg"
             if zipit == "allowed":
                 filename = os.path.basename(path)
-                LOGGER.info(filename)
                 zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
                 os.rename(path, zip_dir + "/" + filename)
             else:
@@ -422,15 +421,15 @@ async def downloadTrack(track: Track, album=None, playlist=None, userProgress=No
                     title=title,
                     thumb=thumb_path,
                     reply_to_message_id=reply_to_id
-            )
-            if Config.ALLOW_DUMP:
-                await media_file.copy(
-                    chat_id=Config.LOG_CHANNEL_ID,
                 )
+                os.remove(thumb_path)
+                os.remove(path)
+                if Config.ALLOW_DUMP:
+                    await media_file.copy(
+                        chat_id=Config.LOG_CHANNEL_ID,
+                    )
 
             # Remove the files after uploading
-            os.remove(thumb_path)
-            os.remove(path)
         #Printf.success(aigpy.path.getFileName(path))
         return True, ""
     except Exception as e:

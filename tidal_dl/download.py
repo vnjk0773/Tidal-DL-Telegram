@@ -233,7 +233,7 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
             if zipit == "allowed":
                 LOGGER.info("ZIP: " + zip_dir)
                 zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
-                zip_file = zip_dir + "/" + obj.name
+                zip_file = zip_dir + "/" + obj.title
                 if os.path.exists(zip_file):
                     os.remove(zip_file)
                 shutil.make_archive(zip_dir, 'zip', zip_file)
