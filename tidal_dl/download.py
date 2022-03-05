@@ -232,13 +232,13 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
                 await __mix__(conf, obj, bot, chat_id, reply_to_id, zipit)
             if zipit == "allowed":
                 LOGGER.info("ZIP: " + zip_dir)
-                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
+                to_be_zipped = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
                 zip_file = zip_dir + "/" + obj.title
                 if os.path.exists(zip_file):
                     os.remove(zip_file)
-                shutil.make_archive(zip_dir, 'zip', zip_file)
+                shutil.make_archive(obj.title, 'zip', to_be_zipped)
                 await bot.send_document(
                     chat_id=chat_id,
-                    document=zip_file + ".zip",
+                    document=to_be_zipped + "/" +  obj.title + ".zip",
                     reply_to_message_id=reply_to_id
                 )
