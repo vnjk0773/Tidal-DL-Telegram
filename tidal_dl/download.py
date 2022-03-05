@@ -217,7 +217,7 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
                         ]
                     ]
                 )
-            ) 
+            )
         else:
             if zipit == "allowed":
                 zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
@@ -236,7 +236,7 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
                 zip_file = zip_dir + "/" + obj.title
                 if os.path.exists(zip_file):
                     os.remove(zip_file)
-                shutil.make_archive(obj.title, 'zip', to_be_zipped)
+                shutil.make_archive(to_be_zipped + obj.title, 'zip', to_be_zipped)
                 await bot.send_document(
                     chat_id=chat_id,
                     document=to_be_zipped + "/" +  obj.title + ".zip",
