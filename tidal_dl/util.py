@@ -409,7 +409,7 @@ async def downloadTrack(track: Track, album=None, playlist=None, userProgress=No
                 artist = metadata.get("artist")
             thumb_path = Config.DOWNLOAD_BASE_DIR + f"/thumb/{reply_to_id}.jpg"
             if zipit == "allowed":
-                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + reply_to_id
+                zip_dir = Config.DOWNLOAD_BASE_DIR + "/" + str(reply_to_id)
                 shutil.move(path, zip_dir)
             else:
                 media_file = await bot.send_audio(
