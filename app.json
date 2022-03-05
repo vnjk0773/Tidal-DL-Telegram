@@ -72,12 +72,12 @@
     },
     "TIDAL_REGION": {
       "description": "Tidal region for search api (recomment to use default)",
-      "value": "IN",
+      "value": "",
       "required": true
     },
     "TIDAL_SEARCH_LIMIT": {
       "description": "Limit number of search results",
-      "value": "10",
+      "value": "",
       "required": true
     },
     "BOT_USERNAME": {
@@ -94,7 +94,7 @@
       "description": "Ignore this XD",
       "value": "YEMS YEMS",
       "required": true
-    },
+    }
   },
   "formation": {
     "worker": {
