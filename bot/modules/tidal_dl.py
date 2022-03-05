@@ -52,7 +52,7 @@ async def zip_tidal(c: Client, cb: CallbackQuery):
         await tidal_dl_start(TOKEN, CONF, string, c, cb.message.chat.id, cb.message.reply_to_message.message_id, "allowed")
 
 @Client.on_callback_query(filters.regex("t_"))
-async def zip_tidal(c: Client, cb: CallbackQuery):
+async def seperate_tidal(c: Client, cb: CallbackQuery):
         string = cb.data.split("_")[1]
         await tidal_dl_start(TOKEN, CONF, string, c, cb.message.chat.id, cb.message.reply_to_message.message_id, "not_allowed")
 
