@@ -13,6 +13,7 @@ from time import sleep
 import logging
 import os
 import shutil
+import zipfile 
 
 from bot import LOGGER, Config
 from bot.helpers.translations import lang
@@ -236,7 +237,12 @@ async def start(user, conf, string, bot=None, chat_id=None, reply_to_id=None, zi
                 zip_file_name = to_be_zipped_dir + "/" + obj.title
                 if os.path.exists(zip_file_name):
                     os.remove(zip_file_name)
-                shutil.make_archive(zip_file_name, 'zip', to_be_zipped_dir)
+                zipf = zipfile.ZipFile(zip_file_name, 'w', zipfile.ZIP_DEFLATED)
+                for files in os.listdir(to_be_zipped_dir):
+                    zipf.write(os.path.join(to_be_zipped_dir, files), files)
+                zipf.close()
+
+                #shutil.make_archive(zip_file_name, 'zip', to_be_zipped_dir)
                 await bot.send_document(
                     chat_id=chat_id,
                     document=zip_file_name + ".zip",
