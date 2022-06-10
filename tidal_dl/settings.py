@@ -107,7 +107,7 @@ class Settings(ModelBase):
     usePlaylistFolder = True
     multiThreadDownload = True
     albumFolderFormat = R"{ArtistName}/{Flag} {AlbumTitle} [{AlbumID}] [{AlbumYear}]"
-    trackFileFormat = R"{TrackNumber} - {ArtistName} - {TrackTitle}{ExplicitFlag}"
+    trackFileFormat = R"{ArtistsName} - {TrackTitle}"
     showProgress = False
     showTrackInfo = True
     saveAlbumInfo = True
@@ -121,7 +121,7 @@ class Settings(ModelBase):
 
     @staticmethod
     def getDefaultTrackFileFormat():
-        return R"{TrackNumber} - {ArtistName} - {TrackTitle}{ExplicitFlag}"
+        return R"{ArtistsName} - {TrackTitle}"
 
     @staticmethod
     def read():
